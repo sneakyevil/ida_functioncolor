@@ -27,12 +27,12 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
                 sl.line = sl.line.replace("\x01\x17", FCOL_START)
                 sl.line = sl.line.replace("\x01\x21", FCOL_START)
 
-                last_space = sl.line.rfind(" ", 0, first_bracket)
-                if (last_space != -1):
-                   sl.line = self._insert_color_at(sl.line, last_space + 1, FCOL_NAME) # Function color
-                
-                # Namespace
-                sl.line = re.sub("(:....:..)([^:]+\()", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line)
+                last_space_bb = sl.line.rfind(" ", 0, first_bracket) # Last space before bracket (Function name start)
+                if (last_space_bb != -1):
+                    sl.line = self._insert_color_at(sl.line, last_space_bb + 1, FCOL_NAME) # Function color
+
+                    # Function namespace end
+                    sl.line = sl.line[:last_space_bb] + re.sub("(:....:..)([^:]+\()", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
 
                 # Left bracket
                 sl.line = re.sub("(..)\\(", "\\1" + FCOL_BRACKET + "(", sl.line)
