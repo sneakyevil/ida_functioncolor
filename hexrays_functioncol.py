@@ -9,7 +9,7 @@ FCOL_START = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_DREF
 FCOL_NAME = ida_lines.SCOLOR_REG
 FCOL_NAMESPACE_END = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_CNAME
 FCOL_BRACKET = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_VOIDOP
-FCOL_ARG = ida_lines.SCOLOR_REG
+FCOL_ARG = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_REG
 
 class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
     def _insert_color_at(self, string, index, color):
@@ -18,7 +18,7 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
     def func_printed(self, cfunc):
         pseudocode = cfunc.get_pseudocode()
         for sl in pseudocode:
-            #print(sl.line)
+            print(sl.line)
 
             # Basically first line...
             first_bracket = sl.line.find("\x09(")
@@ -38,11 +38,10 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
                 sl.line = re.sub("(..)\\(", "\\1" + FCOL_BRACKET + "(", sl.line)
 
                 # Arg/s
-                sl.line = re.sub("\\(..", "(" + ida_lines.SCOLOR_DEFAULT + FCOL_ARG, sl.line)
+                sl.line = re.sub("\\(..", "(" + FCOL_ARG, sl.line)
             else:
-                # Remove Address and set color argument
-                sl.line = re.sub("\\" + ida_lines.SCOLOR_ADDR + "[0-9a-fA-F]{16}", FCOL_ARG, sl.line) # 64-bit
-                sl.line = re.sub("\\" + ida_lines.SCOLOR_ADDR + "[0-9a-fA-F]{8}", FCOL_ARG, sl.line) # 32-bit
+                # Arg
+                sl.line = sl.line.replace("\x01\x21", FCOL_ARG)
 
             # Break out of loop if we reached end
             if (sl.line.find(')') != -1):
