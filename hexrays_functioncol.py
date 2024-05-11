@@ -18,7 +18,7 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
     def func_printed(self, cfunc):
         pseudocode = cfunc.get_pseudocode()
         for sl in pseudocode:
-            print(sl.line)
+            #print(sl.line)
 
             # Basically first line...
             first_bracket = sl.line.find("\x09(")
