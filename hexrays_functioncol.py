@@ -41,6 +41,7 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
                 sl.line = re.sub("\\(..", "(" + FCOL_ARG, sl.line)
             else:
                 # Arg
+                sl.line = sl.line.replace("\x01\x17", FCOL_ARG)
                 sl.line = sl.line.replace("\x01\x21", FCOL_ARG)
 
             # Break out of loop if we reached end
