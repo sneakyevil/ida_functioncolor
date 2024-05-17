@@ -8,6 +8,7 @@ import re
 FCOL_START = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_DREF
 FCOL_NAME = ida_lines.SCOLOR_REG
 FCOL_NAMESPACE_END = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_CNAME
+FCOL_TEMPLATE = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_SYMBOL
 FCOL_BRACKET = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_VOIDOP
 FCOL_ARG = ida_lines.SCOLOR_DEFAULT + ida_lines.SCOLOR_REG
 
@@ -18,7 +19,7 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
     def func_printed(self, cfunc):
         pseudocode = cfunc.get_pseudocode()
         for sl in pseudocode:
-            #print(sl.line)
+            #print(sl.line) # Print in output for testing purposes...
 
             # Basically first line...
             first_bracket = sl.line.find("\x09(")
@@ -30,15 +31,24 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
                 last_space_bb = sl.line.rfind(" ", 0, first_bracket) # Last space before bracket (Function name start)
                 if (last_space_bb != -1):
                     sl.line = self._insert_color_at(sl.line, last_space_bb + 1, FCOL_NAME) # Function color
+                    first_bracket += 2 # Offset due to color insert
 
                     # Function namespace end
-                    sl.line = sl.line[:last_space_bb] + re.sub("(:....:..)([^:]+\()", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
+                    template_start = sl.line.rfind("<", last_space_bb, first_bracket)
+                    template_end = sl.line.rfind(">", last_space_bb, first_bracket)
+                    if (template_start != -1): # Has template?
+                        sl.line = sl.line[:last_space_bb] + re.sub("([<)([>])", FCOL_TEMPLATE + "\\1" + ida_lines.SCOLOR_DEFAULT + FCOL_NAME, sl.line[last_space_bb:])
+                        sl.line = sl.line[:last_space_bb] + re.sub("(:....:..)([^:]+<)", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
+                    
+                    if (template_end == -1 or first_bracket > template_end + 3):
+                        sl.line = sl.line[:last_space_bb] + re.sub("(:....:..)([^:]+\()", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
 
                 # Left bracket
-                sl.line = re.sub("(..)\\(", "\\1" + FCOL_BRACKET + "(", sl.line)
+                sl.line = re.sub("(..)\(", "\\1" + FCOL_BRACKET + "(", sl.line)
 
                 # Arg/s
-                sl.line = re.sub("\\(..", "(" + FCOL_ARG, sl.line)
+                sl.line = re.sub("\(..", "(" + FCOL_ARG, sl.line)
+                sl.line = re.sub("(\(....)", "\\1" + FCOL_ARG, sl.line)
             else:
                 # Arg
                 sl.line = sl.line.replace("\x01\x17", FCOL_ARG)
