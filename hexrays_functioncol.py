@@ -40,10 +40,10 @@ class HexRaysFunctionColHooks(ida_hexrays.Hexrays_Hooks):
                         template_end = sl.line.rfind(">", last_space_bb, begin_bracket)
                         if (template_start != -1): # Has template?
                             sl.line = sl.line[:last_space_bb] + re.sub("([<)([>])", FCOL_TEMPLATE + "\\1" + ida_lines.SCOLOR_DEFAULT + FCOL_NAME, sl.line[last_space_bb:])
-                            sl.line = sl.line[:last_space_bb] + re.sub("(:....:..)([^:]+<)", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
+                            sl.line = sl.line[:last_space_bb] + re.sub("(::)([^:]+<)", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
                         
                         if (template_end == -1 or begin_bracket > template_end + 3):
-                            sl.line = sl.line[:last_space_bb] + re.sub("(:....:..)([^:]+\()", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
+                            sl.line = sl.line[:last_space_bb] + re.sub("(::)([^:]+\()", "\\1" + FCOL_NAMESPACE_END + "\\2", sl.line[last_space_bb:])
 
                     # Left bracket
                     sl.line = re.sub("(..)\(", "\\1" + FCOL_BRACKET + "(", sl.line)
